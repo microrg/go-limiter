@@ -6,7 +6,7 @@
                 {
                     "feature_id": "p1f1",
                     "type": "boolean",
-                    "value": true,
+                    "value": 1,
                     "enabled": true
                 },
                 {
