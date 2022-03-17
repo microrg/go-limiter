@@ -69,7 +69,6 @@ func (l *Limiter) getFeatureMatrix() (*FeatureMatrix, error) {
 				logger.Error("Feature matrix does not exist")
 			}
 		}
-		logger.Errorf("Failed to fetch feature usage: %s", err.Error())
 		return nil, err
 	}
 	defer result.Body.Close()
@@ -140,7 +139,7 @@ func (l *Limiter) getFeatureUsage(userID string) (*FeatureUsage, error) {
 func (l *Limiter) Feature(featureID string, userID string) bool {
 	featureMatrix, err := l.getFeatureMatrix()
 	if err != nil {
-		logger.Errorf("Feature matrix not found: %s", err.Error())
+		logger.Errorf("Failed to fetch feature matrix: %s", err.Error())
 		return false
 	}
 	featureUsage, err := l.getFeatureUsage(userID)
