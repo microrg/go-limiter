@@ -27,4 +27,16 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
+	featureMatrix, err := client.FeatureMatrix()
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(featureMatrix)
+
+	usage, err := client.Usage("5a8a1ca3-aee8-4a96-9bb4-673442728f2e")
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(usage)
 }

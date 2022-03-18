@@ -230,3 +230,23 @@ func (l *Limiter) Set(featureID string, userID string, value int) error {
 
 	return nil
 }
+
+// FeatureMatrix returns the feature matrix for the project
+func (l *Limiter) FeatureMatrix() (*FeatureMatrix, error) {
+	featureMatrix, err := l.getFeatureMatrix()
+	if err != nil {
+		logger.Errorf("Failed to fetch feature matrix: %s", err.Error())
+		return nil, err
+	}
+	return featureMatrix, nil
+}
+
+// Usage returns the user's usage data
+func (l *Limiter) Usage(userID string) (*FeatureUsage, error) {
+	featureUsage, err := l.getFeatureUsage(userID)
+	if err != nil {
+		logger.Errorf("Failed to fetch feature usage: %s", err.Error())
+		return nil, err
+	}
+	return featureUsage, nil
+}

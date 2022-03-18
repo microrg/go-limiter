@@ -40,4 +40,10 @@ client.Increment("my-feature", "user-id")
 
 // Set usage to some value.
 client.Set("my-feature", "user-id", 5)
+
+// Get feature matrix for the project
+client.FeatureMatrix("user-id")
+
+// Get feature usage for a user
+client.Usage("user-id")
 ```
