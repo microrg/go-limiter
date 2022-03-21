@@ -160,7 +160,7 @@ func (l *Limiter) Feature(planID string, featureID string, userID string) bool {
 						return true
 					}
 					if usage, ok := featureUsage.Usage[featureID]; ok {
-						return usage <= feature.Value
+						return usage < feature.Value
 					}
 				}
 			}
