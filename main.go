@@ -12,7 +12,7 @@ func main() {
 		panic(err)
 	}
 
-	if client.Feature("p1f2", "5a8a1ca3-aee8-4a96-9bb4-673442728f2e") {
+	if client.Feature("p1", "p1f2", "5a8a1ca3-aee8-4a96-9bb4-673442728f2e") {
 		fmt.Println("Pass")
 	} else {
 		fmt.Println("Fail")

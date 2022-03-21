@@ -136,7 +136,7 @@ func (l *Limiter) getFeatureUsage(userID string) (*FeatureUsage, error) {
 }
 
 // Feature checks if a feature can be accessed
-func (l *Limiter) Feature(featureID string, userID string) bool {
+func (l *Limiter) Feature(planID string, featureID string, userID string) bool {
 	featureMatrix, err := l.getFeatureMatrix()
 	if err != nil {
 		logger.Errorf("Failed to fetch feature matrix: %s", err.Error())
@@ -149,17 +149,19 @@ func (l *Limiter) Feature(featureID string, userID string) bool {
 	}
 
 	for _, plan := range featureMatrix.Plans {
-		for _, feature := range plan.Features {
-			if feature.FeatureID == featureID {
-				if !feature.Enabled {
-					logger.Infof("Feature %s disabled, skipping check", featureID)
-					return true
-				}
-				if feature.Type == "boolean" && feature.Value == 1 {
-					return true
-				}
-				if usage, ok := featureUsage.Usage[featureID]; ok {
-					return usage <= feature.Value
+		if plan.PlanID == planID {
+			for _, feature := range plan.Features {
+				if feature.FeatureID == featureID {
+					if !feature.Enabled {
+						logger.Infof("Feature %s disabled, skipping check", featureID)
+						return true
+					}
+					if feature.Type == "boolean" && feature.Value == 1 {
+						return true
+					}
+					if usage, ok := featureUsage.Usage[featureID]; ok {
+						return usage <= feature.Value
+					}
 				}
 			}
 		}

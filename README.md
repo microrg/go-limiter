@@ -28,18 +28,18 @@ import (
 )
 
 // Initialize SDK with S3 bucket containing the feature matrix and usage tracking data
-client, _ := limiter.New("my-s3-bucket", "my-project-id")
+client, _ := limiter.New("my-s3-bucket", "project-id")
 
 // Check if a feature is within limit
-if client.Feature("my-feature", "user-id") {
+if client.Feature("plan-name", "feature-name", "user-id") {
     // Pass
 }
 
 // Increment usage by 1.
-client.Increment("my-feature", "user-id")
+client.Increment("feature-name", "user-id")
 
 // Set usage to some value.
-client.Set("my-feature", "user-id", 5)
+client.Set("feature-name", "user-id", 5)
 
 // Get feature matrix for the project
 client.FeatureMatrix("user-id")
