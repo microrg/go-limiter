@@ -6,10 +6,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"os"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
+	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 )
@@ -44,15 +44,21 @@ type FeatureUsage struct {
 }
 
 // New initializes the Limiter
-func New(bucket string, projectID string) (*Limiter, error) {
-	sess := session.Must(session.NewSession())
-	svc := s3.New(sess, aws.NewConfig().WithRegion(os.Getenv("AWS_DEFAULT_REGION")))
-
+func New(projectID string) *Limiter {
 	return &Limiter{
-		S3Client:  svc,
-		S3Bucket:  bucket,
 		ProjectID: projectID,
-	}, nil
+	}
+}
+
+func (l *Limiter) WithAwsCredentials(bucket string, region string, accessKeyID string, secretAccessKey string) *Limiter {
+	sess := session.Must(session.NewSession())
+	svc := s3.New(sess, &aws.Config{
+		Region:      aws.String(region),
+		Credentials: credentials.NewStaticCredentials(accessKeyID, secretAccessKey, ""),
+	})
+	l.S3Bucket = bucket
+	l.S3Client = svc
+	return l
 }
 
 func (l *Limiter) getFeatureMatrix() (*FeatureMatrix, error) {

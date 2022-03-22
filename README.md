@@ -16,19 +16,13 @@ go get github.com/microrg/go-limiter
 
 ## Quick Usage
 
-The following environment variables must be set:
-
-- `AWS_ACCESS_KEY_ID`
-- `AWS_SECRET_ACCESS_KEY`
-- `AWS_DEFAULT_REGION`
-
 ```golang
 import (
     "github.com/microrg/go-limiter/limiter"
 )
 
 // Initialize SDK with S3 bucket containing the feature matrix and usage tracking data
-client, _ := limiter.New("my-s3-bucket", "project-id")
+client := limiter.New("project-id").WithAwsCredentials("s3-bucket", "region", "access-key-id", "secret-access-key")
 
 // Check if a feature is within limit
 if client.Feature("plan-name", "feature-name", "user-id") {
