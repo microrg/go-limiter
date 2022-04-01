@@ -162,8 +162,11 @@ func (l *Limiter) Feature(planID string, featureID string, userID string) bool {
 						logger.Infof("Feature %s disabled, deny.", featureID)
 						return false
 					}
-					if feature.Type == "boolean" && feature.Value == 1 {
+					if feature.Type == "Boolean" && feature.Value == 1 {
 						return true
+					}
+					if feature.Type == "Boolean" && feature.Value == 0 {
+						return false
 					}
 					if usage, ok := featureUsage.Usage[featureID]; ok {
 						return usage < feature.Value
