@@ -159,8 +159,8 @@ func (l *Limiter) Feature(planID string, featureID string, userID string) bool {
 			for _, feature := range plan.Features {
 				if feature.FeatureID == featureID {
 					if !feature.Enabled {
-						logger.Infof("Feature %s disabled, skipping check", featureID)
-						return true
+						logger.Infof("Feature %s disabled, deny.", featureID)
+						return false
 					}
 					if feature.Type == "boolean" && feature.Value == 1 {
 						return true
@@ -173,8 +173,8 @@ func (l *Limiter) Feature(planID string, featureID string, userID string) bool {
 		}
 	}
 
-	logger.Infof("Feature %s not found", featureID)
-	return true
+	logger.Infof("Feature %s not found, deny.", featureID)
+	return false
 }
 
 // Increment increments feature usage by one
