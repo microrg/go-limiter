@@ -168,12 +168,14 @@ func (l *Limiter) Feature(planID string, featureID string, userID string) bool {
 					if usage, ok := featureUsage.Usage[featureID]; ok {
 						return usage < feature.Value
 					}
+					// Feature in plan but undefined on user
+					return true
 				}
 			}
 		}
 	}
 
-	logger.Infof("Feature %s not found, deny.", featureID)
+	logger.Infof("Feature %s not found in any plan, deny.", featureID)
 	return false
 }
 
