@@ -36,6 +36,7 @@ type Feature struct {
 	Type      string `json:"type"`
 	Value     int    `json:"value,omitempty"`
 	Enabled   bool   `json:"enabled"`
+	Soft      bool   `json:"soft"`
 }
 
 type FeatureUsage struct {
@@ -159,14 +160,18 @@ func (l *Limiter) Feature(planID string, featureID string, userID string) bool {
 			for _, feature := range plan.Features {
 				if feature.FeatureID == featureID {
 					if !feature.Enabled {
-						logger.Infof("Feature %s disabled, deny.", featureID)
-						return false
+						logger.Infof("Feature %s disabled, allow.", featureID)
+						return true
 					}
 					if feature.Type == "Boolean" && feature.Value == 1 {
 						return true
 					}
 					if feature.Type == "Boolean" && feature.Value == 0 {
 						return false
+					}
+					if feature.Soft {
+						logger.Infof("Feature %s is soft, allow.", featureID)
+						return true
 					}
 					if usage, ok := featureUsage.Usage[featureID]; ok {
 						return usage < feature.Value
