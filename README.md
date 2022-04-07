@@ -32,6 +32,9 @@ if client.Feature("plan-name", "feature-name", "user-id") {
 // Increment usage by 1.
 client.Increment("feature-name", "user-id")
 
+// Decrement usage by 1.
+client.Decrement("feature-name", "user-id")
+
 // Set usage to some value.
 client.Set("feature-name", "user-id", 5)
 

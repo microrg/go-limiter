@@ -218,6 +218,39 @@ func (l *Limiter) Increment(featureID string, userID string) error {
 	return nil
 }
 
+// Decrement decrements feature usage by one
+func (l *Limiter) Decrement(featureID string, userID string) error {
+	featureUsage, err := l.getFeatureUsage(userID)
+	if err != nil {
+		logger.Errorf("Failed to fetch feature usage: %s", err.Error())
+		return err
+	}
+
+	if featureUsage.Usage[featureID] > 0 {
+		logger.Infof("Feature %s, User %s: Decrementing usage", featureID, userID)
+		featureUsage.Usage[featureID] -= 1
+	}
+
+	p, err := json.Marshal(featureUsage)
+	if err != nil {
+		return err
+	}
+	params := &s3.PutObjectInput{
+		Bucket:      aws.String(l.S3Bucket),
+		Key:         aws.String(fmt.Sprintf("%s/users/%s.json", l.ProjectID, userID)),
+		Body:        aws.ReadSeekCloser(bytes.NewReader(p)),
+		ACL:         aws.String(s3.ObjectCannedACLPublicRead),
+		ContentType: aws.String("application/json"),
+	}
+	_, err = l.S3Client.PutObjectWithContext(context.Background(), params)
+	if err != nil {
+		logger.Error("Failed to update feature usage: %s", err.Error())
+		return err
+	}
+
+	return nil
+}
+
 // Set sets feature usage to some value
 func (l *Limiter) Set(featureID string, userID string, value int) error {
 	featureUsage, err := l.getFeatureUsage(userID)
