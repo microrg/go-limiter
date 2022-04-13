@@ -5,25 +5,31 @@
             "features": [
                 {
                     "feature_id": "p1f1",
-                    "type": "boolean",
+                    "type": "Boolean",
                     "value": 1,
                     "enabled": true
                 },
                 {
                     "feature_id": "p1f2",
-                    "type": "abs_quota",
+                    "type": "Limit",
                     "value": 50,
-                    "enabled": true
+                    "enabled": true,
+                    "webhook": {
+                        "enabled": true,
+                        "url": "url",
+                        "token": "token",
+                        "threshold": 0.75
+                    }
                 },
                 {
                     "feature_id": "p1f3",
-                    "type": "daily_quota",
+                    "type": "Daily Limit",
                     "value": 10,
                     "enabled": true
                 },
                 {
                     "feature_id": "p1f4",
-                    "type": "monthly_quota",
+                    "type": "Monthly Limit",
                     "value": 20,
                     "enabled": true
                 }

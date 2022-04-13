@@ -32,11 +32,19 @@ type Plan struct {
 }
 
 type Feature struct {
-	FeatureID string `json:"feature_id"`
-	Type      string `json:"type"`
-	Value     int    `json:"value,omitempty"`
-	Enabled   bool   `json:"enabled"`
-	Soft      bool   `json:"soft"`
+	FeatureID string  `json:"feature_id"`
+	Type      string  `json:"type"`
+	Value     int     `json:"value,omitempty"`
+	Enabled   bool    `json:"enabled"`
+	Soft      bool    `json:"soft"`
+	Webhook   Webhook `json:"webhook"`
+}
+
+type Webhook struct {
+	Enabled   bool    `json:"enabled"`
+	Url       string  `json:"url,omitempty"`
+	Token     string  `json:"token,omitempty"`
+	Threshold float32 `json:"threshold,omitempty"`
 }
 
 type FeatureUsage struct {
@@ -188,6 +196,11 @@ func (l *Limiter) Feature(planID string, featureID string, userID string) bool {
 
 // Increment increments feature usage by one
 func (l *Limiter) Increment(featureID string, userID string) error {
+	featureMatrix, err := l.getFeatureMatrix()
+	if err != nil {
+		logger.Errorf("Failed to fetch feature matrix: %s", err.Error())
+		return err
+	}
 	featureUsage, err := l.getFeatureUsage(userID)
 	if err != nil {
 		logger.Errorf("Failed to fetch feature usage: %s", err.Error())
@@ -211,6 +224,19 @@ func (l *Limiter) Increment(featureID string, userID string) error {
 	if err != nil {
 		logger.Error("Failed to update feature usage: %s", err.Error())
 		return err
+	}
+
+	// Send webhook
+	curr := featureUsage.Usage[featureID]
+	for _, plan := range featureMatrix.Plans {
+		for _, feature := range plan.Features {
+			if feature.FeatureID == featureID {
+				hook := feature.Webhook
+				if hook.Enabled && float32(curr)/float32(feature.Value) > hook.Threshold {
+					SendWebhook(hook.Url, hook.Token, userID, curr, feature.Value)
+				}
+			}
+		}
 	}
 
 	return nil
@@ -250,6 +276,11 @@ func (l *Limiter) Decrement(featureID string, userID string) error {
 
 // Set sets feature usage to some value
 func (l *Limiter) Set(featureID string, userID string, value int) error {
+	featureMatrix, err := l.getFeatureMatrix()
+	if err != nil {
+		logger.Errorf("Failed to fetch feature matrix: %s", err.Error())
+		return err
+	}
 	featureUsage, err := l.getFeatureUsage(userID)
 	if err != nil {
 		logger.Errorf("Failed to fetch feature usage: %s", err.Error())
@@ -273,6 +304,19 @@ func (l *Limiter) Set(featureID string, userID string, value int) error {
 	if err != nil {
 		logger.Error("Failed to update feature usage: %s", err.Error())
 		return err
+	}
+
+	// Send webhook
+	curr := featureUsage.Usage[featureID]
+	for _, plan := range featureMatrix.Plans {
+		for _, feature := range plan.Features {
+			if feature.FeatureID == featureID {
+				hook := feature.Webhook
+				if hook.Enabled && float32(curr)/float32(feature.Value) > hook.Threshold {
+					SendWebhook(hook.Url, hook.Token, userID, curr, feature.Value)
+				}
+			}
+		}
 	}
 
 	return nil
