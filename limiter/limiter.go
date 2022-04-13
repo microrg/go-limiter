@@ -158,6 +158,20 @@ func (l *Limiter) getFeatureUsage(userID string) (*FeatureUsage, error) {
 	return &featureUsage, nil
 }
 
+func (l *Limiter) shouldSendWebhook(featureMatrix FeatureMatrix, featureUsage FeatureUsage, featureID string, userID string) {
+	curr := featureUsage.Usage[featureID]
+	for _, plan := range featureMatrix.Plans {
+		for _, feature := range plan.Features {
+			if feature.FeatureID == featureID {
+				hook := feature.Webhook
+				if hook.Enabled && float32(curr)/float32(feature.Value) > hook.Threshold {
+					SendWebhook(hook.Url, hook.Token, userID, curr, feature.Value)
+				}
+			}
+		}
+	}
+}
+
 // Feature checks if a feature can be accessed
 func (l *Limiter) Feature(planID string, featureID string, userID string) bool {
 	featureMatrix, err := l.getFeatureMatrix()
@@ -225,18 +239,7 @@ func (l *Limiter) Increment(featureID string, userID string) error {
 		return err
 	}
 
-	// Send webhook
-	curr := featureUsage.Usage[featureID]
-	for _, plan := range featureMatrix.Plans {
-		for _, feature := range plan.Features {
-			if feature.FeatureID == featureID {
-				hook := feature.Webhook
-				if hook.Enabled && float32(curr)/float32(feature.Value) > hook.Threshold {
-					SendWebhook(hook.Url, hook.Token, userID, curr, feature.Value)
-				}
-			}
-		}
-	}
+	l.shouldSendWebhook(*featureMatrix, *featureUsage, featureID, userID)
 
 	return nil
 }
@@ -285,18 +288,7 @@ func (l *Limiter) Set(featureID string, userID string, value int) error {
 		return err
 	}
 
-	// Send webhook
-	curr := featureUsage.Usage[featureID]
-	for _, plan := range featureMatrix.Plans {
-		for _, feature := range plan.Features {
-			if feature.FeatureID == featureID {
-				hook := feature.Webhook
-				if hook.Enabled && float32(curr)/float32(feature.Value) > hook.Threshold {
-					SendWebhook(hook.Url, hook.Token, userID, curr, feature.Value)
-				}
-			}
-		}
-	}
+	l.shouldSendWebhook(*featureMatrix, *featureUsage, featureID, userID)
 
 	return nil
 }
