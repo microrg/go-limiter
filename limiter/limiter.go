@@ -165,7 +165,7 @@ func (l *Limiter) shouldSendWebhook(featureMatrix FeatureMatrix, featureUsage Fe
 			if feature.FeatureID == featureID {
 				hook := feature.Webhook
 				if hook.Enabled && float32(curr)/float32(feature.Value) > hook.Threshold {
-					SendWebhook(hook.Url, hook.Token, userID, curr, feature.Value)
+					SendWebhook(hook.Url, hook.Token, userID, featureID, curr, feature.Value)
 				}
 			}
 		}
