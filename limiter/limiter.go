@@ -70,6 +70,24 @@ func (l *Limiter) WithAwsCredentials(bucket string, region string, accessKeyID s
 	return l
 }
 
+func (l *Limiter) putJsonObject(key string, payload interface{}) error {
+	p, err := json.Marshal(payload)
+	if err != nil {
+		return err
+	}
+	params := &s3.PutObjectInput{
+		Bucket:      aws.String(l.S3Bucket),
+		Key:         aws.String(key),
+		Body:        aws.ReadSeekCloser(bytes.NewReader(p)),
+		ContentType: aws.String("application/json"),
+	}
+	_, err = l.S3Client.PutObjectWithContext(context.Background(), params)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (l *Limiter) getFeatureMatrix() (*FeatureMatrix, error) {
 	result, err := l.S3Client.GetObjectWithContext(context.Background(), &s3.GetObjectInput{
 		Bucket: aws.String(l.S3Bucket),
@@ -114,17 +132,8 @@ func (l *Limiter) getFeatureUsage(userID string) (*FeatureUsage, error) {
 					UserID: userID,
 					Usage:  map[string]int{},
 				}
-				p, err := json.Marshal(featureUsage)
-				if err != nil {
-					return nil, err
-				}
-				params := &s3.PutObjectInput{
-					Bucket:      aws.String(l.S3Bucket),
-					Key:         aws.String(fmt.Sprintf("%s/users/%s.json", l.ProjectID, userID)),
-					Body:        aws.ReadSeekCloser(bytes.NewReader(p)),
-					ContentType: aws.String("application/json"),
-				}
-				_, err = l.S3Client.PutObjectWithContext(context.Background(), params)
+
+				err = l.putJsonObject(fmt.Sprintf("%s/users/%s.json", l.ProjectID, userID), featureUsage)
 				if err != nil {
 					logger.Error("Failed to create feature usage: %s", err.Error())
 
@@ -210,17 +219,7 @@ func (l *Limiter) Increment(featureID string, userID string) error {
 	logger.Infof("Feature %s, User %s: Incrementing usage", featureID, userID)
 	featureUsage.Usage[featureID] += 1
 
-	p, err := json.Marshal(featureUsage)
-	if err != nil {
-		return err
-	}
-	params := &s3.PutObjectInput{
-		Bucket:      aws.String(l.S3Bucket),
-		Key:         aws.String(fmt.Sprintf("%s/users/%s.json", l.ProjectID, userID)),
-		Body:        aws.ReadSeekCloser(bytes.NewReader(p)),
-		ContentType: aws.String("application/json"),
-	}
-	_, err = l.S3Client.PutObjectWithContext(context.Background(), params)
+	err = l.putJsonObject(fmt.Sprintf("%s/users/%s.json", l.ProjectID, userID), featureUsage)
 	if err != nil {
 		logger.Error("Failed to update feature usage: %s", err.Error())
 		return err
@@ -255,17 +254,7 @@ func (l *Limiter) Decrement(featureID string, userID string) error {
 		featureUsage.Usage[featureID] -= 1
 	}
 
-	p, err := json.Marshal(featureUsage)
-	if err != nil {
-		return err
-	}
-	params := &s3.PutObjectInput{
-		Bucket:      aws.String(l.S3Bucket),
-		Key:         aws.String(fmt.Sprintf("%s/users/%s.json", l.ProjectID, userID)),
-		Body:        aws.ReadSeekCloser(bytes.NewReader(p)),
-		ContentType: aws.String("application/json"),
-	}
-	_, err = l.S3Client.PutObjectWithContext(context.Background(), params)
+	err = l.putJsonObject(fmt.Sprintf("%s/users/%s.json", l.ProjectID, userID), featureUsage)
 	if err != nil {
 		logger.Error("Failed to update feature usage: %s", err.Error())
 		return err
@@ -290,17 +279,7 @@ func (l *Limiter) Set(featureID string, userID string, value int) error {
 	logger.Infof("Feature %s, User %s: Setting usage to %d", featureID, userID, value)
 	featureUsage.Usage[featureID] = value
 
-	p, err := json.Marshal(featureUsage)
-	if err != nil {
-		return err
-	}
-	params := &s3.PutObjectInput{
-		Bucket:      aws.String(l.S3Bucket),
-		Key:         aws.String(fmt.Sprintf("%s/users/%s.json", l.ProjectID, userID)),
-		Body:        aws.ReadSeekCloser(bytes.NewReader(p)),
-		ContentType: aws.String("application/json"),
-	}
-	_, err = l.S3Client.PutObjectWithContext(context.Background(), params)
+	err = l.putJsonObject(fmt.Sprintf("%s/users/%s.json", l.ProjectID, userID), featureUsage)
 	if err != nil {
 		logger.Error("Failed to update feature usage: %s", err.Error())
 		return err
