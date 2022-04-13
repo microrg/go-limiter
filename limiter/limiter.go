@@ -114,7 +114,6 @@ func (l *Limiter) getFeatureUsage(userID string) (*FeatureUsage, error) {
 					Bucket:      aws.String(l.S3Bucket),
 					Key:         aws.String(fmt.Sprintf("%s/users/%s.json", l.ProjectID, userID)),
 					Body:        aws.ReadSeekCloser(bytes.NewReader(p)),
-					ACL:         aws.String(s3.ObjectCannedACLPublicRead),
 					ContentType: aws.String("application/json"),
 				}
 				_, err = l.S3Client.PutObjectWithContext(context.Background(), params)
@@ -206,7 +205,6 @@ func (l *Limiter) Increment(featureID string, userID string) error {
 		Bucket:      aws.String(l.S3Bucket),
 		Key:         aws.String(fmt.Sprintf("%s/users/%s.json", l.ProjectID, userID)),
 		Body:        aws.ReadSeekCloser(bytes.NewReader(p)),
-		ACL:         aws.String(s3.ObjectCannedACLPublicRead),
 		ContentType: aws.String("application/json"),
 	}
 	_, err = l.S3Client.PutObjectWithContext(context.Background(), params)
@@ -239,7 +237,6 @@ func (l *Limiter) Decrement(featureID string, userID string) error {
 		Bucket:      aws.String(l.S3Bucket),
 		Key:         aws.String(fmt.Sprintf("%s/users/%s.json", l.ProjectID, userID)),
 		Body:        aws.ReadSeekCloser(bytes.NewReader(p)),
-		ACL:         aws.String(s3.ObjectCannedACLPublicRead),
 		ContentType: aws.String("application/json"),
 	}
 	_, err = l.S3Client.PutObjectWithContext(context.Background(), params)
@@ -270,7 +267,6 @@ func (l *Limiter) Set(featureID string, userID string, value int) error {
 		Bucket:      aws.String(l.S3Bucket),
 		Key:         aws.String(fmt.Sprintf("%s/users/%s.json", l.ProjectID, userID)),
 		Body:        aws.ReadSeekCloser(bytes.NewReader(p)),
-		ACL:         aws.String(s3.ObjectCannedACLPublicRead),
 		ContentType: aws.String("application/json"),
 	}
 	_, err = l.S3Client.PutObjectWithContext(context.Background(), params)
