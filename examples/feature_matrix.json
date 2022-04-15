@@ -18,7 +18,8 @@
                         "enabled": true,
                         "url": "url",
                         "token": "token",
-                        "threshold": 0.75
+                        "threshold": 0.75,
+                        "payload": "{\"limit\":\"{{limit}}\",\"usage\":\"{{usage}}\",\"user_id\":\"{{user_id}}\",\"feature_id\":\"{{feature_id}}\"}"
                     }
                 },
                 {

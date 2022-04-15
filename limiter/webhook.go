@@ -2,14 +2,18 @@ package limiter
 
 import (
 	"bytes"
-	"fmt"
 	"net/http"
+	"strconv"
+	"strings"
 )
 
-func SendWebhook(url string, token string, userID string, featureID string, value int, limit int) error {
+func SendWebhook(url string, token string, payload string, userID string, featureID string, usage int, limit int) error {
 	logger.Infof("User %s, triggering webhook: %s", userID, url)
-
-	var jsonStr = []byte(fmt.Sprintf(`{"user_id":%s,"feature_id":%s,"value":%d,"limit":%d}`, userID, featureID, value, limit))
+	payload = strings.ReplaceAll(payload, "{{user_id}}", userID)
+	payload = strings.ReplaceAll(payload, "{{feature_id}}", featureID)
+	payload = strings.ReplaceAll(payload, `"{{usage}}"`, strconv.Itoa(usage))
+	payload = strings.ReplaceAll(payload, `"{{limit}}"`, strconv.Itoa(limit))
+	var jsonStr = []byte(payload)
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonStr))
 	if err != nil {
 		logger.Errorf("User %s, webhook failed: %s", userID, err.Error())

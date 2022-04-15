@@ -45,6 +45,7 @@ type Webhook struct {
 	Url       string  `json:"url,omitempty"`
 	Token     string  `json:"token,omitempty"`
 	Threshold float32 `json:"threshold,omitempty"`
+	Payload   string  `json:"payload,omitempty"`
 }
 
 type FeatureUsage struct {
@@ -165,7 +166,7 @@ func (l *Limiter) shouldSendWebhook(featureMatrix FeatureMatrix, featureUsage Fe
 			if feature.FeatureID == featureID {
 				hook := feature.Webhook
 				if hook.Enabled && float32(curr)/float32(feature.Value) > hook.Threshold {
-					SendWebhook(hook.Url, hook.Token, userID, featureID, curr, feature.Value)
+					SendWebhook(hook.Url, hook.Token, hook.Payload, userID, featureID, curr, feature.Value)
 				}
 			}
 		}
