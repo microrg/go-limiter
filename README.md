@@ -1,11 +1,8 @@
 # Limiter Go SDK
 
-Limiter is a subscription limits management platform.
+Limiter is a usage limits and quota management platform.
 
 This Go package tracks usage and enforces limits within a Go application.
-
-- Lightweight and fast
-- Relies on S3 for scalability and data availability
 
 
 ## Installation
@@ -16,13 +13,31 @@ go get github.com/microrg/go-limiter
 
 ## Quick Usage
 
+### Default Backend
+
+Initialize SDK with the managed storage backend
+
 ```golang
 import (
     "github.com/microrg/go-limiter/limiter"
 )
 
-// Initialize SDK with S3 bucket containing the feature matrix and usage tracking data
-client := limiter.New("project-id").WithAwsCredentials("s3-bucket", "region", "access-key-id", "secret-access-key")
+client := limiter.New("project-id").WithDefaultBackend("api-token")
+```
+
+### S3 Backend
+
+Initialize SDK with a private S3 bucket storage
+
+```golang
+import (
+    "github.com/microrg/go-limiter/limiter"
+)
+
+client := limiter.New("project-id").WithS3Backend("s3-bucket", "region", "access-key-id", "secret-access-key")
+```
+
+### Available Methods
 
 // Check if a feature is within limit
 if client.Feature("plan-name", "feature-name", "user-id") {

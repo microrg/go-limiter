@@ -1,13 +1,18 @@
-package limiter
+package webhook
 
 import (
 	"bytes"
 	"net/http"
 	"strconv"
 	"strings"
+
+	. "github.com/microrg/go-limiter/pkg/interface"
+	"github.com/microrg/go-limiter/pkg/logging"
 )
 
-func SendWebhook(url string, token string, payload string, userID string, featureID string, usage int, limit int) error {
+var logger logging.Logger
+
+func sendWebhook(url string, token string, payload string, userID string, featureID string, usage int, limit int) error {
 	logger.Infof("User %s, triggering webhook: %s", userID, url)
 	payload = strings.ReplaceAll(payload, "{{user_id}}", userID)
 	payload = strings.ReplaceAll(payload, "{{feature_id}}", featureID)
@@ -33,4 +38,18 @@ func SendWebhook(url string, token string, payload string, userID string, featur
 	logger.Infof("User %s, webhook triggered: %s", userID, url)
 
 	return nil
+}
+
+func ShouldSendWebhook(featureMatrix FeatureMatrix, featureUsage FeatureUsage, featureID string, userID string) {
+	curr := featureUsage.Usage[featureID]
+	for _, plan := range featureMatrix.Plans {
+		for _, feature := range plan.Features {
+			if feature.FeatureID == featureID {
+				hook := feature.Webhook
+				if hook.Enabled && float32(curr)/float32(feature.Value) > hook.Threshold {
+					sendWebhook(hook.Url, hook.Token, hook.Payload, userID, featureID, curr, feature.Value)
+				}
+			}
+		}
+	}
 }
