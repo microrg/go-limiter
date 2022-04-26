@@ -98,6 +98,7 @@ func (b *S3Backend) getFeatureUsage(userID string) (*FeatureUsage, error) {
 				logger.Infof("Creating feature usage json for user %s", userID)
 				featureUsage := &FeatureUsage{
 					UserID: userID,
+					PlanID: "",
 					Usage:  map[string]int{},
 				}
 
@@ -126,7 +127,26 @@ func (b *S3Backend) getFeatureUsage(userID string) (*FeatureUsage, error) {
 	return &featureUsage, nil
 }
 
-func (b *S3Backend) Feature(planID string, featureID string, userID string) bool {
+func (b *S3Backend) Bind(planID string, userID string) error {
+	featureUsage, err := b.getFeatureUsage(userID)
+	if err != nil {
+		logger.Errorf("Failed to fetch feature usage: %s", err.Error())
+		return err
+	}
+
+	logger.Infof("Plan %s, User %s: Binding user to plan", planID, userID)
+	featureUsage.PlanID = planID
+
+	err = b.putJsonObject(fmt.Sprintf("%s/users/%s.json", b.ProjectID, userID), featureUsage)
+	if err != nil {
+		logger.Error("Failed to update feature usage: %s", err.Error())
+		return err
+	}
+
+	return nil
+}
+
+func (b *S3Backend) Feature(featureID string, userID string) bool {
 	featureMatrix, err := b.getFeatureMatrix()
 	if err != nil {
 		logger.Errorf("Failed to fetch feature matrix: %s", err.Error())
@@ -139,7 +159,7 @@ func (b *S3Backend) Feature(planID string, featureID string, userID string) bool
 	}
 
 	for _, plan := range featureMatrix.Plans {
-		if plan.PlanID == planID {
+		if plan.PlanID == featureUsage.PlanID {
 			for _, feature := range plan.Features {
 				if feature.FeatureID == featureID {
 					if !feature.Enabled {
@@ -166,7 +186,7 @@ func (b *S3Backend) Feature(planID string, featureID string, userID string) bool
 		}
 	}
 
-	logger.Infof("Feature %s not found in any plan, deny.", featureID)
+	logger.Infof("Feature %s not found in %s plan, deny.", featureID, featureUsage.PlanID)
 	return false
 }
 

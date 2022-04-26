@@ -27,9 +27,14 @@ func (l *Limiter) WithS3Backend(bucket string, region string, accessKeyID string
 	return l
 }
 
+// Bind a user to a plan
+func (l *Limiter) Bind(planID string, userID string) error {
+	return l.Backend.Bind(planID, userID)
+}
+
 // Feature checks if a feature can be accessed
-func (l *Limiter) Feature(planID string, featureID string, userID string) bool {
-	return l.Backend.Feature(planID, featureID, userID)
+func (l *Limiter) Feature(featureID string, userID string) bool {
+	return l.Backend.Feature(featureID, userID)
 }
 
 // Increment increments feature usage by one

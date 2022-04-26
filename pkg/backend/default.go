@@ -50,8 +50,19 @@ func makeHttpRequest(url string, apiToken string, payload map[string]string) (*h
 	return resp, nil
 }
 
-func (b *DefaultBackend) Feature(planID string, featureID string, userID string) bool {
-	payload := map[string]string{"project_id": b.ProjectID, "plan_id": planID, "feature_id": featureID, "user_id": userID}
+func (b *DefaultBackend) Bind(planID string, userID string) error {
+	payload := map[string]string{"project_id": b.ProjectID, "plan_id": planID, "user_id": userID}
+	resp, err := makeHttpRequest(fmt.Sprintf("%s/%s", b.BackendURL, "/bind"), b.ApiToken, payload)
+	if err != nil {
+		logger.Error(err.Error())
+		return err
+	}
+	defer resp.Body.Close()
+	return nil
+}
+
+func (b *DefaultBackend) Feature(featureID string, userID string) bool {
+	payload := map[string]string{"project_id": b.ProjectID, "feature_id": featureID, "user_id": userID}
 	resp, err := makeHttpRequest(fmt.Sprintf("%s/%s", b.BackendURL, "/feature"), b.ApiToken, payload)
 	if err != nil {
 		logger.Error(err.Error())

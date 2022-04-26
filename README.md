@@ -1,9 +1,5 @@
 # Limiter Go SDK
 
-Limiter is a usage limits and quota management platform.
-
-This Go package tracks usage and enforces limits within a Go application.
-
 
 ## Installation
 
@@ -39,8 +35,12 @@ client := limiter.New("project-id").WithS3Backend("s3-bucket", "region", "access
 
 ### Available Methods
 
+```golang
+// Bind user to a plan
+client.Bind("plan-name", "user-id")
+
 // Check if a feature is within limit
-if client.Feature("plan-name", "feature-name", "user-id") {
+if client.Feature("feature-name", "user-id") {
     // Pass
 }
 

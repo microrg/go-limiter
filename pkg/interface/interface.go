@@ -1,7 +1,8 @@
 package backend
 
 type Backend interface {
-	Feature(planID string, featureID string, userID string) bool
+	Bind(planID string, userId string) error
+	Feature(featureID string, userID string) bool
 	Increment(featureID string, userID string) error
 	Decrement(featureID string, userID string) error
 	Set(featureID string, userID string, value int) error
@@ -37,5 +38,6 @@ type Webhook struct {
 
 type FeatureUsage struct {
 	UserID string         `json:"user_id"`
+	PlanID string         `json:"plan_id"`
 	Usage  map[string]int `json:"usage"`
 }
