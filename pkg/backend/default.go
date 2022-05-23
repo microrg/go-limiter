@@ -21,7 +21,8 @@ type DefaultBackend struct {
 }
 
 type FeatureResp struct {
-	Allow bool `json:"allow"`
+	Allow  bool   `json:"allow"`
+	Reason string `json:"reason"`
 }
 
 // NewDefaultBackend initializes the S3 Backend
@@ -73,8 +74,11 @@ func (b *DefaultBackend) Feature(featureID string, userID string) bool {
 	featureResp := &FeatureResp{}
 	err = json.NewDecoder(resp.Body).Decode(featureResp)
 	if err != nil {
-		logger.Error(err.Error())
+		logger.Info(err.Error())
 		return false
+	}
+	if featureResp.Reason != "" {
+		logger.Info(featureResp.Reason)
 	}
 	return featureResp.Allow
 }

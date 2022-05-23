@@ -21,7 +21,7 @@ import (
 client := limiter.New("project-id").WithDefaultBackend("api-token")
 ```
 
-### S3 Backend
+### S3 Backend (Deprecated)
 
 Initialize SDK with a private S3 bucket storage
 
