@@ -44,13 +44,13 @@ if client.Feature("feature-name", "user-id") {
     // Pass
 }
 
-// Increment usage by 1.
-client.Increment("feature-name", "user-id")
+// Increment usage
+client.Increment("feature-name", "user-id", 1)
 
-// Decrement usage by 1.
-client.Decrement("feature-name", "user-id")
+// Decrement usage
+client.Decrement("feature-name", "user-id", 1)
 
-// Set usage to some value.
+// Set usage to some value
 client.Set("feature-name", "user-id", 5)
 
 // Get feature matrix for the project

@@ -190,7 +190,7 @@ func (b *S3Backend) Feature(featureID string, userID string) bool {
 	return false
 }
 
-func (b *S3Backend) Increment(featureID string, userID string) error {
+func (b *S3Backend) Increment(featureID string, userID string, value int) error {
 	featureMatrix, err := b.getFeatureMatrix()
 	if err != nil {
 		logger.Errorf("Failed to fetch feature matrix: %s", err.Error())
@@ -202,8 +202,12 @@ func (b *S3Backend) Increment(featureID string, userID string) error {
 		return err
 	}
 
-	logger.Infof("Feature %s, User %s: Incrementing usage", featureID, userID)
-	featureUsage.Usage[featureID] += 1
+	if value == 0 {
+		value = 1
+	}
+
+	logger.Infof("Feature %s, User %s: Incrementing usage by %d", featureID, userID, value)
+	featureUsage.Usage[featureID] += value
 
 	err = b.putJsonObject(fmt.Sprintf("%s/users/%s.json", b.ProjectID, userID), featureUsage)
 	if err != nil {
@@ -216,16 +220,20 @@ func (b *S3Backend) Increment(featureID string, userID string) error {
 	return nil
 }
 
-func (b *S3Backend) Decrement(featureID string, userID string) error {
+func (b *S3Backend) Decrement(featureID string, userID string, value int) error {
 	featureUsage, err := b.getFeatureUsage(userID)
 	if err != nil {
 		logger.Errorf("Failed to fetch feature usage: %s", err.Error())
 		return err
 	}
 
+	if value == 0 {
+		value = 1
+	}
+
 	if featureUsage.Usage[featureID] > 0 {
-		logger.Infof("Feature %s, User %s: Decrementing usage", featureID, userID)
-		featureUsage.Usage[featureID] -= 1
+		logger.Infof("Feature %s, User %s: Decrementing usage by %d", featureID, userID, value)
+		featureUsage.Usage[featureID] -= value
 	}
 
 	err = b.putJsonObject(fmt.Sprintf("%s/users/%s.json", b.ProjectID, userID), featureUsage)

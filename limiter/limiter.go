@@ -38,13 +38,13 @@ func (l *Limiter) Feature(featureID string, userID string) bool {
 }
 
 // Increment increments feature usage by one
-func (l *Limiter) Increment(featureID string, userID string) error {
-	return l.Backend.Increment(featureID, userID)
+func (l *Limiter) Increment(featureID string, userID string, value int) error {
+	return l.Backend.Increment(featureID, userID, value)
 }
 
 // Decrement decrements feature usage by one
-func (l *Limiter) Decrement(featureID string, userID string) error {
-	return l.Backend.Decrement(featureID, userID)
+func (l *Limiter) Decrement(featureID string, userID string, value int) error {
+	return l.Backend.Decrement(featureID, userID, value)
 }
 
 // Set sets feature usage to some value

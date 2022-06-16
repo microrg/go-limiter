@@ -3,8 +3,8 @@ package backend
 type Backend interface {
 	Bind(planID string, userId string) error
 	Feature(featureID string, userID string) bool
-	Increment(featureID string, userID string) error
-	Decrement(featureID string, userID string) error
+	Increment(featureID string, userID string, value int) error
+	Decrement(featureID string, userID string, value int) error
 	Set(featureID string, userID string, value int) error
 	FeatureMatrix() (*FeatureMatrix, error)
 	Usage(userID string) (*FeatureUsage, error)
